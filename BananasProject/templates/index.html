@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banana Price Predictor</title>
+</head>
+<body>
+    <h1>The Banana Bread Predictor</h1>
+
+    <form action="/predict" method="POST">
+        <label for="prices">Enter recent prices (comma-separated):</label>
+        <input type="text" name="prices[]" placeholder="e.g., 1050, 1100, 1075, 1150">
+        <button type="submit">Predict</button>
+    </form>
+
+    <h2>Predicted Global Price of Bananas per Metric Ton: <span id="result"></span></h2>
+
+    <script>
+        const form = document.querySelector('form');
+        const result = document.querySelector('#result');
+
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Correctly get input values from the form
+            const prices = form.querySelector('input[name="prices[]"]').value.split(',')
+                .map(price => parseFloat(price.trim())); // Get input value and split
+
+            // Prepare the JSON data
+            const jsonData = JSON.stringify({ data: prices });
+
+            // Send JSON data
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Set content type to JSON
+                },
+                body: jsonData,
+            });
+
+            const data = await response.json();
+            if (data.predicted_price) {
+                result.textContent = data.predicted_price.toFixed(2) + ' USD';
+            } else {
+                result.textContent = 'Error: ' + data.error;
+            }
+        });
+    </script>
+</body>
+</html>
